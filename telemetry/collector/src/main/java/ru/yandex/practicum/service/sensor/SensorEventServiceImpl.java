@@ -3,6 +3,7 @@ package ru.yandex.practicum.service.sensor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.KafkaClient;
 import ru.yandex.practicum.kafka.telemetry.event.*;
@@ -14,11 +15,19 @@ import ru.yandex.practicum.model.sensor.*;
 public class SensorEventServiceImpl implements SensorEventService {
     private final KafkaClient kafkaClient;
 
+    @Value(value = "${sensorEventTopic}")
+    private String topic;
+
     @Override
     public void collect(SensorEvent event) {
-        String topic = "telemetry.sensors.v1";
         SensorEventAvro sensorEventAvro = mapToAvro(event);
-        kafkaClient.getProducer().send(new ProducerRecord<>(topic, sensorEventAvro));
+        kafkaClient.getProducer().send(new ProducerRecord<>(
+                topic,
+                null,
+                sensorEventAvro.getTimestamp().toEpochMilli(),
+                sensorEventAvro.getHubId(),
+                sensorEventAvro));
+        log.trace("into topic {} was send event {}", topic, event );
 
     }
 

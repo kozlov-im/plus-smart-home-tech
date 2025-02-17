@@ -3,6 +3,7 @@ package ru.yandex.practicum.service.hub;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.KafkaClient;
 import ru.yandex.practicum.kafka.telemetry.event.*;
@@ -16,11 +17,20 @@ import java.util.List;
 public class HubEvenServiceImpl implements HubEventService {
     private final KafkaClient kafkaClient;
 
+    @Value(value = "${hubEventTopic}")
+    private String topic;
+
     @Override
     public void collect(HubEvent event) {
-        String topic = "telemetry.hubs.v1";
         HubEventAvro hubEventAvro = mapToAvro(event);
-        kafkaClient.getProducer().send(new ProducerRecord<>(topic, hubEventAvro));
+        if (hubEventAvro == null) throw new AssertionError();
+        kafkaClient.getProducer().send(new ProducerRecord<>(
+                topic,
+                null,
+                hubEventAvro.getTimestamp().toEpochMilli(),
+                hubEventAvro.getHubId(),
+                hubEventAvro));
+        log.trace("into topic {} was send event {}", topic, event );
 
     }
 
