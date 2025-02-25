@@ -1,6 +1,7 @@
 package ru.yandex.practicum.service.hub;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +13,7 @@ import ru.yandex.practicum.model.hub.*;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class HubEvenServiceImpl implements HubEventService {
     private final KafkaClient kafkaClient;
