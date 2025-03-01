@@ -24,7 +24,7 @@ public class ClimiteSensorEventHandler implements SensorEventHandler {
 
     @Override
     public SensorEventProto.PayloadCase getMessageType() {
-        return SensorEventProto.PayloadCase.CLIMATE_SENSOR_PROTO;
+        return SensorEventProto.PayloadCase.CLIMATE_SENSOR_EVENT;
     }
 
     @Override
@@ -37,11 +37,11 @@ public class ClimiteSensorEventHandler implements SensorEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.trace("into topic {} was send event {}", topic, eventAvro);
+        log.info("into topic {} was send event {}", topic, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {
-        ClimateSensorProto climateSensorProto = eventProto.getClimateSensorProto();
+        ClimateSensorProto climateSensorProto = eventProto.getClimateSensorEvent();
         ClimateSensorAvro climateSensorAvro = ClimateSensorAvro.newBuilder()
                 .setTemperatureC(climateSensorProto.getTemperatureC())
                 .setHumidity(climateSensorProto.getHumidity())

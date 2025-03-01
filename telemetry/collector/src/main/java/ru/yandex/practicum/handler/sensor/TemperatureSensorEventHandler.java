@@ -5,11 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.grpc.telemetry.event.ClimateSensorProto;
 import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.grpc.telemetry.event.TemperatureSensorProto;
 import ru.yandex.practicum.kafka.KafkaClient;
-import ru.yandex.practicum.kafka.telemetry.event.ClimateSensorAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.TemperatureSensorAvro;
 
@@ -26,7 +24,7 @@ public class TemperatureSensorEventHandler implements SensorEventHandler {
 
     @Override
     public SensorEventProto.PayloadCase getMessageType() {
-        return SensorEventProto.PayloadCase.TEMPERATURE_SENSOR_PROTO;
+        return SensorEventProto.PayloadCase.TEMPERATURE_SENSOR_EVENT;
     }
 
     @Override
@@ -39,11 +37,11 @@ public class TemperatureSensorEventHandler implements SensorEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.trace("into topic {} was send event {}", topic, eventAvro);
+        log.info("into topic {} was send event {}", topic, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {
-        TemperatureSensorProto temperatureSensorProto = eventProto.getTemperatureSensorProto();
+        TemperatureSensorProto temperatureSensorProto = eventProto.getTemperatureSensorEvent();
         TemperatureSensorAvro temperatureSensorAvro = TemperatureSensorAvro.newBuilder()
                 .setTemperatureC(temperatureSensorProto.getTemperatureC())
                 .setTemperatureF(temperatureSensorProto.getTemperatureF())

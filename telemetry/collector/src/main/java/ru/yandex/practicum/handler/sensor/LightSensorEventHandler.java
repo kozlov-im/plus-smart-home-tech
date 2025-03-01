@@ -24,7 +24,7 @@ public class LightSensorEventHandler implements SensorEventHandler {
 
     @Override
     public SensorEventProto.PayloadCase getMessageType() {
-        return SensorEventProto.PayloadCase.LIGHT_SENSOR_PROTO;
+        return SensorEventProto.PayloadCase.LIGHT_SENSOR_EVENT;
     }
 
     @Override
@@ -37,11 +37,11 @@ public class LightSensorEventHandler implements SensorEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.trace("into topic {} was send event {}", topic, eventAvro);
+        log.info("into topic {} was send event {}", topic, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {
-        LightSensorProto lightSensorProto = eventProto.getLightSensorProto();
+        LightSensorProto lightSensorProto = eventProto.getLightSensorEvent();
         LightSensorAvro lightSensorAvro = LightSensorAvro.newBuilder()
                 .setLinkQuality(lightSensorProto.getLinkQuality())
                 .setLuminosity(lightSensorProto.getLuminosity())

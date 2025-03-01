@@ -9,8 +9,8 @@ option java_package = "ru.yandex.practicum.grpc.telemetry.event";
 
 message ClimateSensorProto {
   int32 temperature_c = 1;
-  int32 humidity = 2;
-  int32 co2_level = 3;
+  int32 humidity = 3;
+  int32 co2_level = 5;
 }
 
 message LightSensorProto {
@@ -38,10 +38,10 @@ message SensorEventProto {
   google.protobuf.Timestamp timestamp = 2;
   string hubId = 3;
   oneof payload {
-    ClimateSensorProto climate_sensor_proto = 4;
-    LightSensorProto light_sensor_proto = 5;
-    MotionSensorProto motion_sensor_proto = 6;
-    SwitchSensorProto switch_sensor_proto = 7;
-    TemperatureSensorProto temperature_sensor_proto = 8;
+    MotionSensorProto motion_sensor_event = 4;            // данные события датчика движения
+    TemperatureSensorProto temperature_sensor_event = 5;  // данные события температурного датчика
+    LightSensorProto light_sensor_event = 6;              // данные события датчика освещённости
+    ClimateSensorProto climate_sensor_event = 7;          // данные события климатического датчика
+    SwitchSensorProto switch_sensor_event = 8;
   }
 }

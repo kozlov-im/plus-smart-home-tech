@@ -1,4 +1,4 @@
-/*package ru.yandex.practicum.handler.sensor;
+package ru.yandex.practicum.handler.sensor;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class SwitchSensorEventHandler implements SensorEventHandler {
 
     @Override
     public SensorEventProto.PayloadCase getMessageType() {
-        return SensorEventProto.PayloadCase.SWITCH_SENSOR_PROTO;
+        return SensorEventProto.PayloadCase.SWITCH_SENSOR_EVENT;
     }
 
     @Override
@@ -37,11 +37,11 @@ public class SwitchSensorEventHandler implements SensorEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.trace("into topic {} was send event {}", topic, eventAvro);
+        log.info("into topic {} was send event {}", topic, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {
-        SwitchSensorProto switchSensorProto = eventProto.getSwitchSensorProto();
+        SwitchSensorProto switchSensorProto = eventProto.getSwitchSensorEvent();
         SwitchSensorAvro switchSensorAvro = SwitchSensorAvro.newBuilder()
                 .setState(switchSensorProto.getState())
                 .build();
@@ -53,4 +53,4 @@ public class SwitchSensorEventHandler implements SensorEventHandler {
                 .setPayload(switchSensorAvro)
                 .build();
     }
-}*/
+}

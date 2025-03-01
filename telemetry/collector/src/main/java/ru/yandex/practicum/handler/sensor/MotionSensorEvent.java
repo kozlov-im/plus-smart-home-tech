@@ -24,7 +24,7 @@ public class MotionSensorEvent implements SensorEventHandler {
 
     @Override
     public SensorEventProto.PayloadCase getMessageType() {
-        return SensorEventProto.PayloadCase.MOTION_SENSOR_PROTO;
+        return SensorEventProto.PayloadCase.MOTION_SENSOR_EVENT;
     }
 
     @Override
@@ -37,11 +37,11 @@ public class MotionSensorEvent implements SensorEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.trace("into topic {} was send event {}", topic, eventAvro);
+        log.info("into topic {} was send event {}", topic, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {
-        MotionSensorProto motionSensorProto = eventProto.getMotionSensorProto();
+        MotionSensorProto motionSensorProto = eventProto.getMotionSensorEvent();
         MotionSensorAvro motionSensorAvro = MotionSensorAvro.newBuilder()
                 .setLinkQuality(motionSensorProto.getLinkQuality())
                 .setMotion(motionSensorProto.getMotion())
