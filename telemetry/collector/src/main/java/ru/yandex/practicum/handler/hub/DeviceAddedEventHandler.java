@@ -38,7 +38,7 @@ public class DeviceAddedEventHandler implements HubEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.trace("into topic {} was send event {}", topic, eventAvro);
+        log.info("into topic {} was send event {}", topic, eventAvro);
     }
 
     private HubEventAvro mapToAvro(HubEventProto eventProto) {
