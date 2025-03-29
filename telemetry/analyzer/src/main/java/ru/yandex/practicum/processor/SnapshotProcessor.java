@@ -34,7 +34,7 @@ public class SnapshotProcessor {
                 for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
                     SensorsSnapshotAvro snapshotAvro = record.value();
                     snapshotHandler.handle(snapshotAvro);
-                    log.info("Analyzer got snapshot {}", snapshotAvro);
+                    //log.info("Analyzer got snapshot {}", snapshotAvro);
                 }
             }
         } catch (Exception e) {

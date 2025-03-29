@@ -17,11 +17,11 @@ public class HubEventHandler {
     public void handle(HubEventAvro event) {
         switch (event.getPayload()) {
             case DeviceAddedEventAvro deviceAddedEventAvro ->
-                    sensorService.addSensor(deviceAddedEventAvro.getId(), event.getHubId());
+                    sensorService.addSensor(deviceAddedEventAvro, event);
             case DeviceRemovedEventAvro deviceRemovedEventAvro ->
                     sensorService.removeSensor(deviceRemovedEventAvro.getId(), event.getHubId());
             case ScenarioAddedEventAvro scenarioAddedEventAvro ->
-                    scenarioService.addScenario(scenarioAddedEventAvro, event.getHubId());
+                    scenarioService.addScenario(scenarioAddedEventAvro, event.getHubId(), event);
             case ScenarioRemovedEventAvro scenarioRemovedEventAvro ->
                     scenarioService.removeScenario(scenarioRemovedEventAvro, event.getHubId());
             case null, default -> System.out.println("unknown event");

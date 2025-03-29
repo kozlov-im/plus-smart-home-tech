@@ -24,17 +24,20 @@ public class SnapshotHandler {
         String hubId = snapshot.getHubId();
         List<Scenario> scenarios = scenarioRepository.findByHubId(hubId);
 
-        for (Scenario scenario : scenarios) {
-            for (Condition condition : scenario.getConditions()) {
-                if (checkCondition(condition, snapshot)) {
-                    executeActions(scenario.getActions(), hubId);
-                }
-            }
-        }
+        scenarios.stream()
+                .filter(scenario -> isScenarioFit(scenario, snapshot))
+                .forEach(scenario -> executeActions(scenario.getActions(), hubId));
+    }
+
+    private boolean isScenarioFit(Scenario scenario, SensorsSnapshotAvro snapshot) {
+        return scenario.getConditions().stream().allMatch(condition -> checkCondition(condition, snapshot));
     }
 
     private boolean checkCondition(Condition condition, SensorsSnapshotAvro snapshot) {
         SensorStateAvro sensorState = snapshot.getSensorState().get(condition.getSensor().getId());
+        if (sensorState == null) {
+            return false;
+        }
         switch (condition.getType()) {
             case MOTION:
                 if (sensorState.getData() instanceof MotionSensorAvro motionSensorAvro) {
@@ -58,6 +61,12 @@ public class SnapshotHandler {
                 }
                 break;
             case TEMPERATURE:
+                System.out.println(sensorState.getData().getClass());
+                if (sensorState.getData() instanceof ClimateSensorAvro climateSensorAvro) {
+                    return executeCondition(climateSensorAvro.getTemperatureC(),
+                            condition.getOperation(),
+                            condition.getValue());
+                }
                 if (sensorState.getData() instanceof TemperatureSensorAvro temperatureSensorAvro) {
                     return executeCondition(temperatureSensorAvro.getTemperatureC(),
                             condition.getOperation(),
@@ -82,9 +91,6 @@ public class SnapshotHandler {
                 log.info("unknown datatype");
                 return false;
         }
-
-        System.out.println(condition.getType());
-
         return false;
     }
 
@@ -100,6 +106,6 @@ public class SnapshotHandler {
         for (Action action : actions) {
             hubRouterClient.executeAction(action, hubId);
         }
-
     }
+
 }

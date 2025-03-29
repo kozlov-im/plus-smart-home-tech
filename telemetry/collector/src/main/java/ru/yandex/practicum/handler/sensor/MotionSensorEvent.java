@@ -37,7 +37,7 @@ public class MotionSensorEvent implements SensorEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.info("into topic {} was send event {}", topic, eventAvro);
+        log.info("Into {} sent MotionSensor {}", topic, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {

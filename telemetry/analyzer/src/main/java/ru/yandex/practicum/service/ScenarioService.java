@@ -1,8 +1,10 @@
 package ru.yandex.practicum.service;
 
+import com.google.protobuf.Empty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 import ru.yandex.practicum.model.Action;
@@ -23,20 +25,20 @@ import java.util.Optional;
 public class ScenarioService {
     private final ScenarioRepository scenarioRepository;
 
-    public void addScenario(ScenarioAddedEventAvro event, String hubId) {
+    public void addScenario(ScenarioAddedEventAvro event, String hubId, HubEventAvro hubEvent) {
 
         Optional<Scenario> scenarioOptional = scenarioRepository.findByHubIdAndName(hubId, event.getName());
 
         if (scenarioOptional.isPresent()) {
             scenarioRepository.delete(scenarioOptional.get());
-            createScenario(event, hubId);
-            log.info("scenario was updated");
+            createScenario(event, hubId, hubEvent);
+            log.info("Scenario={} was updated", scenarioOptional.get().getName());
         } else {
-            createScenario(event, hubId);
+            createScenario(event, hubId, hubEvent);
         }
     }
 
-    private void createScenario(ScenarioAddedEventAvro event, String hubId) {
+    private void createScenario(ScenarioAddedEventAvro event, String hubId, HubEventAvro hubEvent) {
         Scenario scenario = new Scenario();
         scenario.setName(event.getName());
         scenario.setHubId(hubId);
@@ -60,6 +62,7 @@ public class ScenarioService {
         scenario.setConditions(conditions);
         scenario.setActions(actions);
         scenarioRepository.save(scenario);
+        log.info("Scenario={} added; {}, Event {}", scenario.getName(), scenario, hubEvent);
     }
 
     public void removeScenario (ScenarioRemovedEventAvro event, String hubId) {

@@ -38,7 +38,7 @@ public class AggregationStarter {
             consumer.subscribe(List.of(topic));
 
             while (true) {
-                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(Duration.ofMillis(1000));
+                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(Duration.ofMillis(100));
                 int count = 0;
 
                 if (records.isEmpty()) {
@@ -56,7 +56,7 @@ public class AggregationStarter {
                                         snapshotAvro.getHubId(),
                                         snapshotAvro);
                         producer.send(producerRecord);
-                        log.info("snapshot {} was send to topic {}", snapshotAvro, snapshotTopic);
+                        log.info("Into {} send snapshot {}", snapshotTopic, snapshotAvro);
                     }
                     manageOffsets(record, count, consumer);
                     count++;

@@ -36,7 +36,7 @@ public class HubEventProcessor implements Runnable {
                 for (ConsumerRecord<String, HubEventAvro> record : records) {
                     HubEventAvro hubEventAvro = record.value();
                     hubEventHandler.handle(hubEventAvro);
-                    log.info("Analyzer got hubEvent {}", hubEventAvro);
+                    //log.info("Analyzer got hubEvent from {} {}", topic, hubEventAvro);
                 }
             }
         } catch (Exception e) {
