@@ -24,18 +24,22 @@ public class SnapshotProcessor {
     @Value(value = "${snapshotTopic}")
     private String topic;
 
+    @Value(value = "${consumerAttemptTimeoutMillis}")
+    private int CONSUMER_ATTEMPT_TIMEOUT;
+
     public void start() {
         Consumer<String, SensorsSnapshotAvro> consumer = kafkaClient.getSnapshotConsumer();
         try (consumer) {
             Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
             consumer.subscribe(List.of(topic));
             while (!Thread.currentThread().isInterrupted()) {
-                ConsumerRecords<String, SensorsSnapshotAvro> records = consumer.poll(Duration.ofMillis(100));
+                ConsumerRecords<String, SensorsSnapshotAvro> records = consumer.poll(Duration.ofMillis(CONSUMER_ATTEMPT_TIMEOUT));
                 for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
                     SensorsSnapshotAvro snapshotAvro = record.value();
                     snapshotHandler.handle(snapshotAvro);
                     //log.info("Analyzer got snapshot {}", snapshotAvro);
                 }
+                consumer.commitAsync();
             }
         } catch (Exception e) {
             log.error("Snapshot consumer got an error: ", e);

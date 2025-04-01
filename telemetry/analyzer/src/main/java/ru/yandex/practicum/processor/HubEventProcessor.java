@@ -22,6 +22,8 @@ public class HubEventProcessor implements Runnable {
     @Value(value = "${hubEventTopic}")
     private String topic;
 
+    @Value(value = "${consumerAttemptTimeoutMillis}")
+    private int CONSUMER_ATTEMPT_TIMEOUT;
 
     @Override
     public void run() {
@@ -31,13 +33,14 @@ public class HubEventProcessor implements Runnable {
             consumer.subscribe(List.of(topic));
 
             while (!Thread.currentThread().isInterrupted()) {
-                ConsumerRecords<String, HubEventAvro> records = consumer.poll(Duration.ofMillis(100));
+                ConsumerRecords<String, HubEventAvro> records = consumer.poll(Duration.ofMillis(CONSUMER_ATTEMPT_TIMEOUT));
 
                 for (ConsumerRecord<String, HubEventAvro> record : records) {
                     HubEventAvro hubEventAvro = record.value();
                     hubEventHandler.handle(hubEventAvro);
                     //log.info("Analyzer got hubEvent from {} {}", topic, hubEventAvro);
                 }
+                consumer.commitSync();
             }
         } catch (Exception e) {
             log.error("Hub consumer got an error: ", e);

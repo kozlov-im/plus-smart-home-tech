@@ -29,6 +29,8 @@ public class AggregationStarter {
     private String topic;
     @Value(value = "${snapshotTopic}")
     private String snapshotTopic;
+    @Value(value = "${consumerAttemptTimeoutMillis}")
+    private int CONSUMER_ATTEMPT_TIMEOUT;
 
     public void start() {
         Consumer<String, SensorEventAvro> consumer = kafkaClient.getConsumer();
@@ -38,7 +40,7 @@ public class AggregationStarter {
             consumer.subscribe(List.of(topic));
 
             while (true) {
-                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(Duration.ofMillis(100));
+                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(Duration.ofMillis(CONSUMER_ATTEMPT_TIMEOUT));
                 int count = 0;
 
                 if (records.isEmpty()) {
