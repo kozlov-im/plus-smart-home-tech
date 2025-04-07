@@ -37,7 +37,7 @@ public class ClimiteSensorEventHandler implements SensorEventHandler {
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.info("into topic {} was send event {}", topic, eventAvro);
+        log.info("Into {} sent ClimateSensor {}", topic, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {

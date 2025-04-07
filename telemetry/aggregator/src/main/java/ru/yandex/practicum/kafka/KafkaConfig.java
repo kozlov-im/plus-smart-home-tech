@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer;
-import ru.yandex.practicum.kafka.serializer.SensorEventDeserializer;
+import ru.yandex.practicum.kafka.deserializer.SensorEventDeserializer;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
 import java.util.Properties;
@@ -58,8 +58,8 @@ public class KafkaConfig {
 
             private void initConsumer() {
                 Properties properties = new Properties();
-                properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "SomeConsumer");
-                properties.put(ConsumerConfig.GROUP_ID_CONFIG, "some.group.id");
+                properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "SensorConsumer");
+                properties.put(ConsumerConfig.GROUP_ID_CONFIG, "sensorCollector");
                 properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
                 properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
                 properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SensorEventDeserializer.class);
