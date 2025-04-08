@@ -1,5 +1,6 @@
 package ru.yandex.practicum.kafka;
 
+import lombok.Data;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -9,7 +10,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer;
@@ -19,10 +20,13 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import java.util.Properties;
 
 @Configuration
+@ConfigurationProperties("aggregator.kafka")
+@Data
 public class KafkaConfig {
 
-    @Value(value = "${kafkaBootstrapServer}")
     private String bootstrapServer;
+    private String customerClientId;
+    private String customerGroupId;
 
     @Bean
     KafkaClient getClient() {
@@ -58,8 +62,8 @@ public class KafkaConfig {
 
             private void initConsumer() {
                 Properties properties = new Properties();
-                properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "SensorConsumer");
-                properties.put(ConsumerConfig.GROUP_ID_CONFIG, "sensorCollector");
+                properties.put(ConsumerConfig.CLIENT_ID_CONFIG, customerClientId);
+                properties.put(ConsumerConfig.GROUP_ID_CONFIG, customerGroupId);
                 properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
                 properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
                 properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SensorEventDeserializer.class);

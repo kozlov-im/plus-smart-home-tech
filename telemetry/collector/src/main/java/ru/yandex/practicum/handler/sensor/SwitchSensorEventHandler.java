@@ -1,9 +1,9 @@
 package ru.yandex.practicum.handler.sensor;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.grpc.telemetry.event.SwitchSensorProto;
@@ -14,13 +14,12 @@ import ru.yandex.practicum.kafka.telemetry.event.SwitchSensorAvro;
 import java.time.Instant;
 
 @Component
-@RequiredArgsConstructor
+@Data
+@ConfigurationProperties("topics")
 @Slf4j
 public class SwitchSensorEventHandler implements SensorEventHandler {
     private final KafkaClient kafkaClient;
-
-    @Value(value = "${sensorEventTopic}")
-    private String topic;
+    private String telemetrySensors;
 
     @Override
     public SensorEventProto.PayloadCase getMessageType() {
@@ -32,12 +31,12 @@ public class SwitchSensorEventHandler implements SensorEventHandler {
         SensorEventAvro eventAvro = mapToAvro(eventProto);
 
         kafkaClient.getProducer().send(new ProducerRecord<>(
-                topic,
+                telemetrySensors,
                 null,
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.info("Into {} sent SwitchSensor {}", topic, eventAvro);
+        log.info("Into {} sent SwitchSensor {}", telemetrySensors, eventAvro);
     }
 
     private SensorEventAvro mapToAvro(SensorEventProto eventProto) {

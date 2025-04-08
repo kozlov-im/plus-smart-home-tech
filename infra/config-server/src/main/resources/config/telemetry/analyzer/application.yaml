@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:6432/smart-home-tech
+    driverClassName: org.postgresql.Driver
+    username: sa
+    password: sa
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+
+analyzer:
+  kafka:
+     bootstrap-server: localhost:9092
+     hub-consumer-client-id: hubConsumer
+     hub-consumer-group-id: analyzer.hub.group
+     snapshot-consumer-client-id: snapshotConsumer
+     snapshot-consumer-group-id: analyzer.snapshot.group
+
+topics:
+  telemetry-hubs: telemetry.hubs.v1
+  telemetry-snapshots: telemetry.snapshots.v1
+  consumer-attempt-timeout: 100
+
+grpc:
+  client:
+    hub-router:
+      address: static://localhost:59090
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
