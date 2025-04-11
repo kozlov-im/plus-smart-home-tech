@@ -8,3 +8,12 @@ topics:
   telemetry-sensors: telemetry.sensors.v1
   telemetry-snapshots: telemetry.snapshots.v1
   consumer-attempt-timeout: 100
+
+spring:
+  application:
+    name: aggregator
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
