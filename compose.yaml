@@ -44,4 +44,3 @@ services:
       - POSTGRES_USER=sa
       - POSTGRES_PASSWORD=sa
 
-

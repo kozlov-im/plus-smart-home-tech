@@ -5,8 +5,3 @@ grpc:
 spring:
   application:
     name: hubRouter
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
