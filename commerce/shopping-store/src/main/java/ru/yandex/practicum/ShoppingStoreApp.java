@@ -6,9 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class ShoppingStore {
+public class ShoppingStoreApp {
     public static void main(String[] args) {
-        SpringApplication.run(ShoppingStore.class, args);
+        SpringApplication.run(ShoppingStoreApp.class, args);
 
     }
 }

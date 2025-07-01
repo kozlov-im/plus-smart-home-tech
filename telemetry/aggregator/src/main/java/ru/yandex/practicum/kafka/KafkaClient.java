@@ -8,6 +8,7 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 public interface KafkaClient {
 
     Producer<String, SpecificRecordBase> getProducer();
+
     Consumer<String, SensorEventAvro> getConsumer();
 
 }

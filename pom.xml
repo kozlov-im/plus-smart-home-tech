@@ -19,7 +19,6 @@
         <module>telemetry</module>
         <module>infra</module>
         <module>commerce</module>
-        <module>commerce/shopping-cart</module>
     </modules>
 
     <properties>
@@ -33,7 +32,7 @@
         <grpc.version>1.63.0</grpc.version>
         <spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
 
-        <!--       Plugins       -->
+                <!--       Plugins       -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version>
         <protobuf-plugin.version>2.4.0</protobuf-plugin.version>

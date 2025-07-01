@@ -6,9 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.Pageable;
 import ru.yandex.practicum.dto.ProductDto;
-import ru.yandex.practicum.dto.SetProductQuantityStateRequest;
-import ru.yandex.practicum.dto.enums.ProductCategory;
-import ru.yandex.practicum.dto.enums.QuantityState;
+import ru.yandex.practicum.enums.ProductCategory;
+import ru.yandex.practicum.enums.QuantityState;
 import ru.yandex.practicum.repository.ShoppingStoreRepository;
 import ru.yandex.practicum.service.ShoppingStoreService;
 
@@ -49,9 +48,6 @@ public class ShoppingStoreController {
 
     @PostMapping("/quantityState")
     public ProductDto setProductQuantityState(UUID productId, QuantityState quantityState) {
-        //UUID productId = quantityStateRequest.getProductId();
-       // QuantityState quantityState = quantityStateRequest.getQuantityState();
-        //log.info("quantityState request {}", quantityStateRequest);
         log.info("quantityState request: productId {}, quantityState {}", productId, quantityState);
         return shoppingStoreService.setProductQuantityState(productId, quantityState);
 
