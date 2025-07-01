@@ -2,8 +2,8 @@ package ru.yandex.practicum.service;
 
 import ru.yandex.practicum.dto.Pageable;
 import ru.yandex.practicum.dto.ProductDto;
-import ru.yandex.practicum.dto.enums.ProductCategory;
-import ru.yandex.practicum.dto.enums.QuantityState;
+import ru.yandex.practicum.enums.ProductCategory;
+import ru.yandex.practicum.enums.QuantityState;
 
 import java.util.Collection;
 import java.util.UUID;
