@@ -1,6 +1,5 @@
 package ru.yandex.practicum.service;
 
-import com.google.protobuf.Empty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -65,7 +64,7 @@ public class ScenarioService {
         log.info("Scenario={} added; {}, Event {}", scenario.getName(), scenario, hubEvent);
     }
 
-    public void removeScenario (ScenarioRemovedEventAvro event, String hubId) {
+    public void removeScenario(ScenarioRemovedEventAvro event, String hubId) {
         Optional<Scenario> scenarioOptional = scenarioRepository.findByHubIdAndName(hubId, event.getName());
         scenarioOptional.ifPresent(scenarioRepository::delete);
     }
