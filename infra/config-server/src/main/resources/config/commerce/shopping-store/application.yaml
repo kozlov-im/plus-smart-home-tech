@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:6432/smart-home-tech
+    url: jdbc:postgresql://localhost:7432/smart-home-shop
     driverClassName: org.postgresql.Driver
     username: sa
     password: sa
@@ -13,7 +13,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        default_schema: shopping-store
   application:
     name: shopping-store
 

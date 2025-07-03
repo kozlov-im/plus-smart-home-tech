@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "carts", schema = "shopping-cart")
+@Table(name = "carts")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

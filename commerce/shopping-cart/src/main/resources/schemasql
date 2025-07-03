@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS "shopping-cart";
+--CREATE SCHEMA IF NOT EXISTS "shopping-cart";
 
 --CREATE TABLE IF NOT EXISTS "shopping-cart".carts (
 --shopping_cart_id UUID PRIMARY KEY,
