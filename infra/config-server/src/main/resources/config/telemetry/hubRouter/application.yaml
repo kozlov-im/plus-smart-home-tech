@@ -1,0 +1,7 @@
+grpc:
+  server:
+    port: 59090
+
+spring:
+  application:
+    name: hubRouter

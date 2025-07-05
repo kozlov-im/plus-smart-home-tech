@@ -44,4 +44,32 @@ services:
       - POSTGRES_USER=sa
       - POSTGRES_PASSWORD=sa
 
+  db-shop:
+    image: postgres:16.1
+    container_name: smart-home-shop
+    ports:
+      - "7432:5432"
+    environment:
+      - POSTGRES_DB=smart-home-shop
+      - POSTGRES_USER=sa
+      - POSTGRES_PASSWORD=sa
 
+  db-cart:
+    image: postgres:16.1
+    container_name: smart-home-cart
+    ports:
+      - "8432:5432"
+    environment:
+      - POSTGRES_DB=smart-home-cart
+      - POSTGRES_USER=sa
+      - POSTGRES_PASSWORD=sa
+
+  db-warehouse:
+    image: postgres:16.1
+    container_name: smart-home-warehouse
+    ports:
+      - "9432:5432"
+    environment:
+      - POSTGRES_DB=smart-home-warehouse
+      - POSTGRES_USER=sa
+      - POSTGRES_PASSWORD=sa

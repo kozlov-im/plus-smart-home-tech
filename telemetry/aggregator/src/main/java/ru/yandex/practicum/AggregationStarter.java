@@ -1,6 +1,6 @@
 package ru.yandex.practicum;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.*;
@@ -8,7 +8,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.KafkaClient;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
@@ -18,29 +18,27 @@ import java.time.Duration;
 import java.util.*;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
+@ConfigurationProperties("topics")
+@Data
 public class AggregationStarter {
     private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
     private final RecordHandler recordHandler;
     private final KafkaClient kafkaClient;
 
-    @Value(value = "${sensorEventTopic}")
-    private String topic;
-    @Value(value = "${snapshotTopic}")
-    private String snapshotTopic;
-    @Value(value = "${consumerAttemptTimeoutMillis}")
-    private int CONSUMER_ATTEMPT_TIMEOUT;
+    private String telemetrySensors;
+    private String telemetrySnapshots;
+    private int consumerAttemptTimeout;
 
     public void start() {
         Consumer<String, SensorEventAvro> consumer = kafkaClient.getConsumer();
         Producer<String, SpecificRecordBase> producer = kafkaClient.getProducer();
 
         try {
-            consumer.subscribe(List.of(topic));
+            consumer.subscribe(List.of(telemetrySensors));
 
             while (true) {
-                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(Duration.ofMillis(CONSUMER_ATTEMPT_TIMEOUT));
+                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(Duration.ofMillis(consumerAttemptTimeout));
                 int count = 0;
 
                 if (records.isEmpty()) {
@@ -52,13 +50,13 @@ public class AggregationStarter {
                     if (sensorsSnapshotAvroOptional.isPresent()) {
                         SensorsSnapshotAvro snapshotAvro = sensorsSnapshotAvroOptional.get();
                         ProducerRecord<String, SpecificRecordBase> producerRecord =
-                                new ProducerRecord<>(snapshotTopic,
+                                new ProducerRecord<>(telemetrySnapshots,
                                         null,
                                         snapshotAvro.getTimestamp().toEpochMilli(),
                                         snapshotAvro.getHubId(),
                                         snapshotAvro);
                         producer.send(producerRecord);
-                        log.info("Into {} send snapshot {}", snapshotTopic, snapshotAvro);
+                        log.info("Into {} send snapshot {}", telemetrySnapshots, snapshotAvro);
                     }
                     manageOffsets(record, count, consumer);
                     count++;

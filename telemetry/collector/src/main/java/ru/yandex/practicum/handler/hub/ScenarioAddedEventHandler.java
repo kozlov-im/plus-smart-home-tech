@@ -1,9 +1,9 @@
 package ru.yandex.practicum.handler.hub;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.grpc.telemetry.event.*;
 import ru.yandex.practicum.kafka.KafkaClient;
@@ -13,13 +13,12 @@ import java.time.Instant;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
+@Data
+@ConfigurationProperties("topics")
 @Slf4j
 public class ScenarioAddedEventHandler implements HubEventHandler {
     private final KafkaClient kafkaClient;
-
-    @Value(value = "${hubEventTopic}")
-    private String topic;
+    private String telemetryHubs;
 
     @Override
     public HubEventProto.PayloadCase getMessageType() {
@@ -31,12 +30,12 @@ public class ScenarioAddedEventHandler implements HubEventHandler {
         HubEventAvro eventAvro = mapToAvro(eventProto);
 
         kafkaClient.getProducer().send(new ProducerRecord<>(
-                topic,
+                telemetryHubs,
                 null,
                 eventAvro.getTimestamp().toEpochMilli(),
                 eventAvro.getHubId(),
                 eventAvro));
-        log.info("Into {} sent ScenarioAddEvent {}", topic, eventAvro);
+        log.info("Into {} sent ScenarioAddEvent {}", telemetryHubs, eventAvro);
     }
 
     private HubEventAvro mapToAvro(HubEventProto eventProto) {

@@ -1,0 +1,16 @@
+collector:
+  kafka:
+    bootstrap-server: localhost:9092
+
+topics:
+  telemetry-sensors: telemetry.sensors.v1
+  telemetry-hubs: telemetry.hubs.v1
+  consumer-attempt-timeout: 100
+
+grpc:
+  server:
+    port: 59091
+
+spring:
+  application:
+    name: collector
