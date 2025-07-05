@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:6432/smart-home-tech
+    url: jdbc:postgresql://localhost:8432/smart-home-cart
     driverClassName: org.postgresql.Driver
     username: sa
     password: sa
@@ -13,9 +13,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        default_schema: shopping-cart
   application:
     name: shopping-cart
 
 server:
-  port: 4421
+  port: 0

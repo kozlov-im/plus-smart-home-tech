@@ -3,6 +3,7 @@ package ru.yandex.practicum.controller;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.Pageable;
 import ru.yandex.practicum.dto.ProductDto;
@@ -11,7 +12,6 @@ import ru.yandex.practicum.enums.QuantityState;
 import ru.yandex.practicum.repository.ShoppingStoreRepository;
 import ru.yandex.practicum.service.ShoppingStoreService;
 
-import java.util.Collection;
 import java.util.UUID;
 
 @RestController
@@ -23,7 +23,7 @@ public class ShoppingStoreController {
     private ShoppingStoreRepository shoppingStoreRepository;
 
     @GetMapping
-    public Collection<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, Pageable pageable) {
+    public Page<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, Pageable pageable) {
         log.info("getProductsByCategory request category {}, pageable {}", category, pageable);
         return shoppingStoreService.getProductsByCategory(category, pageable);
     }

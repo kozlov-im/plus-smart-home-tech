@@ -1,0 +1,14 @@
+--CREATE SCHEMA IF NOT EXISTS "shopping-cart";
+
+--CREATE TABLE IF NOT EXISTS "shopping-cart".carts (
+--shopping_cart_id UUID PRIMARY KEY,
+--username VARCHAR(255),
+--state VARCHAR(20)
+--);
+--
+--CREATE TABLE IF NOT EXISTS "shopping-cart".cart_product (
+--cart_id UUID REFERENCES "shopping-cart".carts(shopping_cart_id),
+--product_id UUID,
+--quantity int,
+--PRIMARY KEY (cart_id, product_id)
+--);

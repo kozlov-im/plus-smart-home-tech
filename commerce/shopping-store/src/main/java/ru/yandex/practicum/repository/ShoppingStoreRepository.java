@@ -1,5 +1,6 @@
 package ru.yandex.practicum.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,5 +14,8 @@ import java.util.UUID;
 @Repository
 public interface ShoppingStoreRepository extends JpaRepository<Product, UUID> {
 @Query("SELECT p FROM Product p WHERE p.productCategory = :category")
-    List<Product> findAllByCategory(ProductCategory category, PageRequest pageRequest);
+    List<Product> findAllByCategoryOld(ProductCategory category, PageRequest pageRequest);
+
+    @Query("SELECT p FROM Product p WHERE p.productCategory = :category")
+    Page<Product> findAllByCategory(ProductCategory category, PageRequest pageRequest);
 }
