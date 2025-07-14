@@ -111,7 +111,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         try {
             shoppingStoreClient.updateProductQuantity(product.getProductId(), quantityState);
         } catch (FeignException e) {
-            log.error("Feign client error");
+            log.error("Feign client error {}", e.getMessage());
         }
     }
 }

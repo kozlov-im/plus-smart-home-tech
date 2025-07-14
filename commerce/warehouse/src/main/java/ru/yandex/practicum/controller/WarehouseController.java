@@ -39,7 +39,8 @@ public class WarehouseController {
 
     @PostMapping("/check")
     public BookedProductsDto checkProductsForBooking(@RequestBody ShoppingCartDto shoppingCartDto) {
-        log.info("checkProductsForBooking request {}", shoppingCartDto);
+        //log.info("checkProductsForBooking request {}", shoppingCartDto);
+        log.debug("Проверка достаточного количества товаров для корзины {}", shoppingCartDto.getShoppingCartId());
         return warehouseService.checkProductsForBooking(shoppingCartDto);
     }
 }
