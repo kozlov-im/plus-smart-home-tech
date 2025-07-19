@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.dto.ShoppingCartDto;
 import ru.yandex.practicum.enums.ShoppingCartState;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
+import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.feignClient.WarehouseClient;
 import ru.yandex.practicum.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.model.ShoppingCart;
@@ -31,8 +32,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         userProductsInCart.putAll(products);
         shoppingCart.setProducts(userProductsInCart);
         ShoppingCartDto shoppingCartDto = shoppingCartMapper.mapToShoppingCartDto(shoppingCart);
-        System.out.println(shoppingCartDto);
-        warehouseClient.checkProductsForBooking(shoppingCartDto);
+        warehouseClient.checkProductsForBooking(shoppingCartDto, "cart");
         shoppingCartRepository.save(shoppingCart);
         return shoppingCartDto;
     }
@@ -66,9 +66,16 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         userProductsInCart.put(request.getProductId(), request.getNewQuantity());
         shoppingCart.setProducts(userProductsInCart);
         ShoppingCartDto shoppingCartDto = shoppingCartMapper.mapToShoppingCartDto(shoppingCart);
-        System.out.println(shoppingCartDto);
-        warehouseClient.checkProductsForBooking(shoppingCartDto);
+        warehouseClient.checkProductsForBooking(shoppingCartDto, "cart");
         return shoppingCartMapper.mapToShoppingCartDto(shoppingCartRepository.save(shoppingCart));
+    }
+
+    @Override
+    public String getUsernameByShoppingCartId(UUID shoppingCartId) {
+        String username = shoppingCartRepository.findNameByShoppingCartId(shoppingCartId).orElseThrow(
+                () -> new NotFoundException("Cart is not found")
+        );
+        return username; //shoppingCartRepository.findNameByShoppingCartId(shoppingCartId);
     }
 
 

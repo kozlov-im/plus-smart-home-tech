@@ -10,13 +10,13 @@ import java.util.Arrays;
 
 @Slf4j
 @RestControllerAdvice
-public class ShoppingCartExceptionHandler {
+public class OrderExceptionHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorMessage handleNotAuthorizedUserException(NotAuthorizedUserException exception) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleNoOrderFoundException(NoOrderFoundException exception) {
         log.error(Arrays.toString(exception.getStackTrace()));
-        return new ErrorMessage(exception, HttpStatus.UNAUTHORIZED, "NotAuthorizedUserException");
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NoOrderFoundException");
     }
 
     @ExceptionHandler
@@ -32,5 +32,6 @@ public class ShoppingCartExceptionHandler {
         log.error(Arrays.toString(exception.getStackTrace()));
         return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "NoSpecifiedProductInWarehouseException");
     }
+
 
 }

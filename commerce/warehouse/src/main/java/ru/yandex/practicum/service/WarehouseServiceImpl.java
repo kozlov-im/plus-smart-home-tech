@@ -1,6 +1,5 @@
 package ru.yandex.practicum.service;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,6 +8,7 @@ import ru.yandex.practicum.dto.BookedProductsDto;
 import ru.yandex.practicum.dto.ShoppingCartDto;
 import ru.yandex.practicum.enums.QuantityState;
 import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
+import ru.yandex.practicum.exception.ProductNotFoundException;
 import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.feignClient.ShoppingStoreClient;
 import ru.yandex.practicum.mapper.WarehouseProductMapper;
@@ -20,7 +20,6 @@ import ru.yandex.practicum.request.NewProductInWarehouseRequest;
 import java.security.SecureRandom;
 import java.util.*;
 
-@SuppressWarnings("checkstyle:Regexp")
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -64,7 +63,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public BookedProductsDto checkProductsForBooking(ShoppingCartDto shoppingCartDto) {
+    public BookedProductsDto checkProductsForBooking(ShoppingCartDto shoppingCartDto, String type) {
 
         double totalWeight = 0;
         double totalVolume = 0;
@@ -81,25 +80,39 @@ public class WarehouseServiceImpl implements WarehouseService {
                 throw new NoSpecifiedProductInWarehouseException("amount of quantity for productId " + productId + " not enough");
             }
 
+            if (type.equals("order")) {
+                product.setQuantity(product.getQuantity() - quantity);
+                warehouseRepository.save(product);
+                updateQuantityInShoppingStore(product);
+            }
+
             totalWeight += product.getWeight() * quantity;
             totalVolume += product.getWeight() * product.getHeight() * product.getDepth() * quantity;
             fragile |= product.isFragile();
         }
         return BookedProductsDto.builder()
-                .deliveryWeight(totalWeight)
-                .deliveryVolume(totalVolume)
+                .deliveryWeight(Math.round(totalWeight * 100.0) / 100.0)
+                .deliveryVolume(Math.round(totalVolume * 100.0) / 100.0)
                 .fragile(fragile)
                 .build();
     }
 
+    @Override
+    public void returnProduct(Map<UUID, Integer> products) {
+        Collection<AddProductToWarehouseRequest> returnProductsList = products.entrySet().stream()
+                .map(entry -> new AddProductToWarehouseRequest(entry.getKey(), entry.getValue())).toList();
+        returnProductsList.forEach(this::addProductQuantity);
+    }
+
     private void checkProductAlreadyInWarehouse(UUID productId) {
         warehouseRepository.findById(productId).ifPresent(warehouseProduct -> {
-            throw new SpecifiedProductAlreadyInWarehouseException("Product already present in the warehouse"); });
+            throw new SpecifiedProductAlreadyInWarehouseException("Product " + productId + "already present in the warehouse");
+        });
     }
 
     private WarehouseProduct getWarehouseProduct(UUID productId) {
-       return warehouseRepository.findById(productId).orElseThrow(
-                () -> new NoSpecifiedProductInWarehouseException("Product is not found"));
+        return warehouseRepository.findById(productId).orElseThrow(
+                () -> new NoSpecifiedProductInWarehouseException("Product " + productId + " is not found"));
     }
 
     private void updateQuantityInShoppingStore(WarehouseProduct product) {
@@ -110,8 +123,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 : QuantityState.MANY;
         try {
             shoppingStoreClient.updateProductQuantity(product.getProductId(), quantityState);
-        } catch (FeignException e) {
-            log.error("Feign client error {}", e.getMessage());
+        } catch (ProductNotFoundException e) {
+            log.error("Feign client error: Product with UUID={} is not found in shopping store. Quantity in the shopping store was not updated!",
+                    product.getProductId());
         }
     }
 }

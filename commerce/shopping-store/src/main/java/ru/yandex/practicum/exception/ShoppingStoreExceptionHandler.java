@@ -16,6 +16,13 @@ public class ShoppingStoreExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage handleProductNotFoundException(ProductNotFoundException exception) {
         log.error(Arrays.toString(exception.getStackTrace()));
-        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "Object was not found");
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "ProductNotFoundException");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleNoSpecifiedProductInWarehouseException(NoSpecifiedProductInWarehouseException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NoSpecifiedProductInWarehouseException");
     }
 }

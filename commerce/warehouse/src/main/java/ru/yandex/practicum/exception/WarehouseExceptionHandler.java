@@ -16,13 +16,20 @@ public class WarehouseExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorMessage handleSpecifiedProductAlreadyInWarehouseException(SpecifiedProductAlreadyInWarehouseException exception) {
         log.error(Arrays.toString(exception.getStackTrace()));
-        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "Chosen product already in warehouse");
+        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "SpecifiedProductAlreadyInWarehouseException");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorMessage handleNoSpecifiedProductInWarehouseException(NoSpecifiedProductInWarehouseException exception) {
         log.error(Arrays.toString(exception.getStackTrace()));
-        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "Chosen product is absent in warehouse");
+        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "NoSpecifiedProductInWarehouseException");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleProductNotFoundException(ProductNotFoundException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "ProductNotFoundException");
     }
 }

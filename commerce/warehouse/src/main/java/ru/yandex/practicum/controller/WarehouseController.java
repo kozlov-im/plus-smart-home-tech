@@ -10,6 +10,9 @@ import ru.yandex.practicum.request.AddProductToWarehouseRequest;
 import ru.yandex.practicum.request.NewProductInWarehouseRequest;
 import ru.yandex.practicum.service.WarehouseService;
 
+import java.util.Map;
+import java.util.UUID;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -38,9 +41,15 @@ public class WarehouseController {
     }
 
     @PostMapping("/check")
-    public BookedProductsDto checkProductsForBooking(@RequestBody ShoppingCartDto shoppingCartDto) {
-        //log.info("checkProductsForBooking request {}", shoppingCartDto);
-        log.debug("Проверка достаточного количества товаров для корзины {}", shoppingCartDto.getShoppingCartId());
-        return warehouseService.checkProductsForBooking(shoppingCartDto);
+    public BookedProductsDto checkProductsForBooking(@RequestBody ShoppingCartDto shoppingCartDto,
+                                                     @RequestParam(defaultValue = "cart") String type) {
+        log.info("checkProductsForBooking request {}", shoppingCartDto);
+        return warehouseService.checkProductsForBooking(shoppingCartDto, type);
+    }
+
+    @PostMapping("/return")
+    public void returnProduct(@RequestBody Map<UUID, Integer> products) {
+        log.info("returnProduct request {}", products);
+        warehouseService.returnProduct(products);
     }
 }

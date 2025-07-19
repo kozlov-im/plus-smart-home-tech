@@ -55,4 +55,10 @@ public class ShoppingCartController {
         return shoppingCartService.changeProductQuantityInShoppingCart(username, request);
     }
 
+    @GetMapping("/username")
+    public String getUsernameByShoppingCartId(@RequestParam UUID shoppingCartId) {
+        log.info("getUsernameByShoppingCartId {}", shoppingCartId);
+        return shoppingCartService.getUsernameByShoppingCartId(shoppingCartId);
+    }
+
 }

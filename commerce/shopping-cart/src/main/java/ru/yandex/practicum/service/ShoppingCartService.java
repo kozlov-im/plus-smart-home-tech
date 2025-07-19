@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service;
 
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.dto.ShoppingCartDto;
 import ru.yandex.practicum.request.ChangeProductQuantityRequest;
 
@@ -17,4 +18,6 @@ public interface ShoppingCartService {
     ShoppingCartDto deleteProductsFromShoppingCart(String username, List<UUID> products);
 
     ShoppingCartDto changeProductQuantityInShoppingCart(String username, ChangeProductQuantityRequest request);
+
+    String getUsernameByShoppingCartId(UUID shoppingCartId);
 }
