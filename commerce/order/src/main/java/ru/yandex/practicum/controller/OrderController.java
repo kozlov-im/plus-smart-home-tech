@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     @PostMapping("/return")
-    public OrderDto returnOrder(@RequestBody ProductReturnRequest request) {
+    public OrderDto returnOrder(@Valid @RequestBody ProductReturnRequest request) {
         log.info("returnOrder request {}", request);
         return orderService.returnOrder(request);
     }
@@ -93,10 +93,29 @@ public class OrderController {
         return orderService.setOrderAssembleFailed(orderId);
     }
 
+    @PostMapping("/payment/success")
+    public OrderDto setOrderPaymentSuccess(@RequestBody UUID orderId) {
+        log.info("setOrderPaymentSuccess request for order{}", orderId);
+        return orderService.setOrderPaymentSuccess(orderId);
+    }
+
+    @GetMapping("/id")
+    public OrderDto getOrderById(@RequestParam UUID orderId) {
+        log.info("getOrderById {}", orderId);
+        return orderService.getOrderById(orderId);
+    }
+
+    @PostMapping("/delivery/success")
+    public OrderDto setOrderDeliverySuccess(@RequestBody UUID orderId) {
+        log.info("setOrderDeliverySuccess request for order{}", orderId);
+        return orderService.setOrderDeliverySuccess(orderId);
+    }
+
+
 
     @GetMapping("/test")
     public String test() {
-        return "test";
+        return "Order is running";
     }
 
 

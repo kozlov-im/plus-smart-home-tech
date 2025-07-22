@@ -3,15 +3,21 @@ package ru.yandex.practicum.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.dto.BookedProductsDto;
+import ru.yandex.practicum.dto.DeliveryDto;
 import ru.yandex.practicum.dto.OrderDto;
+import ru.yandex.practicum.dto.PaymentDto;
+import ru.yandex.practicum.enums.DeliveryState;
 import ru.yandex.practicum.enums.OrderState;
 import ru.yandex.practicum.exception.NoOrderFoundException;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
+import ru.yandex.practicum.feignClient.DeliveryClient;
+import ru.yandex.practicum.feignClient.PaymentClient;
 import ru.yandex.practicum.feignClient.ShoppingCartClient;
 import ru.yandex.practicum.feignClient.WarehouseClient;
 import ru.yandex.practicum.mapper.OrderMapper;
 import ru.yandex.practicum.model.Order;
 import ru.yandex.practicum.repository.OrderRepository;
+import ru.yandex.practicum.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.request.CreateNewOrderRequest;
 import ru.yandex.practicum.request.ProductReturnRequest;
 
@@ -27,6 +33,8 @@ public class OrderServiceImpl implements OrderService {
     private final ShoppingCartClient shoppingCartClient;
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
+    private final DeliveryClient deliveryClient;
+    private final PaymentClient paymentClient;
 
     @Override
     public Collection<OrderDto> getUserOrders(String username) {
@@ -41,6 +49,17 @@ public class OrderServiceImpl implements OrderService {
         BookedProductsDto bookedProducts = warehouseClient.checkProductsForBooking(request.getShoppingCart(), "order");
         Order order = orderMapper.mapToOrder(request, bookedProducts);
         order.setUsername(username);
+        order = orderRepository.save(order);
+
+        DeliveryDto newDeliveryDto = DeliveryDto.builder()
+                .orderId(order.getOrderId())
+                .fromAddress(warehouseClient.getWarehouseAddress())
+                .toAddress(request.getAddress())
+                .deliveryState(DeliveryState.CREATED)
+                .build();
+        newDeliveryDto = deliveryClient.createNewDelivery(newDeliveryDto);
+        order.setDeliveryId(newDeliveryDto.getDeliveryId());
+
         return orderMapper.mapToOrderDto(orderRepository.save(order));
     }
 
@@ -49,6 +68,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrder(UUID.fromString(request.getOrderId()));
         warehouseClient.returnProduct(request.getProducts());
         order.setState(OrderState.PRODUCT_RETURNED);
+        deliveryClient.setDeliveryCancel(order.getDeliveryId());
         orderRepository.save(order);
         return orderMapper.mapToOrderDto(order);
     }
@@ -57,10 +77,18 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto createOrderPayment(UUID orderId) {
         Order order = getOrder(orderId);
 
-        //Реализовать оплату заказа
+        BigDecimal paymentProductCost = paymentClient.calculatePaymentProductCost(orderMapper.mapToOrderDto(order));
+        BigDecimal deliveryCost = deliveryClient.calculateDeliveryCost(orderMapper.mapToOrderDto(order));
 
+        order.setProductPrice(paymentProductCost);
+        order.setDeliveryPrice(deliveryCost);
+        order.setTotalPrice(paymentProductCost.add(deliveryCost));
+
+        PaymentDto paymentDto = paymentClient.createPayment(orderMapper.mapToOrderDto(order));
+        order.setPaymentId(paymentDto.getPaymentId());
         order.setState(OrderState.ON_PAYMENT);
-        return orderMapper.mapToOrderDto(order);
+        paymentClient.setPaymentSuccess(paymentDto.getPaymentId());
+        return orderMapper.mapToOrderDto(orderRepository.save(order));
     }
 
     @Override
@@ -94,22 +122,17 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto calculateOrderTotalPrice(UUID orderId) {
         Order order = getOrder(orderId);
-
-        //реализовать получение цены
-
-        BigDecimal totalPrice = BigDecimal.valueOf(125.0);
-        order.setTotalPrice(totalPrice);
+        BigDecimal paymentProductCost = paymentClient.calculatePaymentProductCost(orderMapper.mapToOrderDto(order));
+        BigDecimal deliveryCost = deliveryClient.calculateDeliveryCost(orderMapper.mapToOrderDto(order));
+        order.setTotalPrice(paymentProductCost.add(deliveryCost));
         return orderMapper.mapToOrderDto(orderRepository.save(order));
     }
 
     @Override
     public OrderDto calculateOrderDelivery(UUID orderId) {
         Order order = getOrder(orderId);
-
-        //реализовать получение доставки
-
-        BigDecimal deliveryPrice = BigDecimal.valueOf(25.0);
-        order.setDeliveryPrice(deliveryPrice);
+        BigDecimal deliveryCost = deliveryClient.calculateDeliveryCost(orderMapper.mapToOrderDto(order));
+        order.setDeliveryPrice(deliveryCost);
         return orderMapper.mapToOrderDto(orderRepository.save(order));
     }
 
@@ -117,7 +140,12 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto assembleOrder(UUID orderId) {
         Order order = getOrder(orderId);
 
-        //реализовать сборку заказа;
+        AssemblyProductsForOrderRequest request = AssemblyProductsForOrderRequest.builder()
+                .orderId(orderId)
+                .products(order.getProducts())
+                .build();
+
+        warehouseClient.assemblyProductsForOrder(request);
 
         order.setState(OrderState.ASSEMBLED);
         return orderMapper.mapToOrderDto(orderRepository.save(order));
@@ -127,6 +155,28 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto setOrderAssembleFailed(UUID orderId) {
         Order order = getOrder(orderId);
         order.setState(OrderState.ASSEMBLY_FAILED);
+        return orderMapper.mapToOrderDto(orderRepository.save(order));
+    }
+
+    @Override
+    public OrderDto setOrderPaymentSuccess(UUID orderId) {
+        Order order = getOrder(orderId);
+        order.setState(OrderState.PAID);
+        return orderMapper.mapToOrderDto(orderRepository.save(order));
+    }
+
+    @Override
+    public OrderDto getOrderById(UUID orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NoOrderFoundException("Order " + orderId + " is not found")
+        );
+        return orderMapper.mapToOrderDto(order);
+    }
+
+    @Override
+    public OrderDto setOrderDeliverySuccess(UUID orderId) {
+        Order order = getOrder(orderId);
+        order.setState(OrderState.DELIVERED);
         return orderMapper.mapToOrderDto(orderRepository.save(order));
     }
 

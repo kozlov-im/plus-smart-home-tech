@@ -32,4 +32,25 @@ public class WarehouseExceptionHandler {
         log.error(Arrays.toString(exception.getStackTrace()));
         return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "ProductNotFoundException");
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleProductInShoppingCartLowQuantityInWarehouse(ProductInShoppingCartLowQuantityInWarehouse exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "ProductInShoppingCartLowQuantityInWarehouse");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleNoOrderFoundException(NoOrderFoundException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NoOrderFoundException");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleNotFoundException(NotFoundException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NotFoundException");
+    }
 }

@@ -29,6 +29,15 @@ public class FeignErrorDecoder implements ErrorDecoder {
             if (statusCode == HttpStatus.NOT_FOUND && errorMessage.getUserMessage().equals("ProductNotFoundException")) {
                 return new ProductNotFoundException(errorMessage.getMessage());
             }
+            if (statusCode == HttpStatus.NOT_FOUND && errorMessage.getUserMessage().equals("PaymentNotFoundException")) {
+                return new PaymentNotFoundException(errorMessage.getMessage());
+            }
+            if (statusCode == HttpStatus.NOT_FOUND && errorMessage.getUserMessage().equals("NoOrderFoundException")) {
+                return new NoOrderFoundException(errorMessage.getMessage());
+            }
+            if (statusCode == HttpStatus.BAD_REQUEST && errorMessage.getUserMessage().equals("NotEnoughInfoInOrderToCalculateException")) {
+                return new NotEnoughInfoInOrderToCalculateException(errorMessage.getMessage());
+            }
 
         } catch (IOException e) {
             return new Exception(e.getMessage());

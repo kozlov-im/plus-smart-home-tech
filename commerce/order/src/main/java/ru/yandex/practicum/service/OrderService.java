@@ -33,4 +33,10 @@ public interface OrderService {
     OrderDto assembleOrder(UUID orderId);
 
     OrderDto setOrderAssembleFailed(UUID orderId);
+
+    OrderDto setOrderPaymentSuccess(UUID orderId);
+
+    OrderDto getOrderById(UUID orderId);
+
+    OrderDto setOrderDeliverySuccess(UUID orderId);
 }

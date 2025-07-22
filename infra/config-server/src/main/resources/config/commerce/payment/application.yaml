@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:11432/smart-home-payment
+    driverClassName: org.postgresql.Driver
+    username: sa
+    password: sa
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update #none
+    properties:
+      hibernate:
+        format_sql: true
+  application:
+    name: payment
+
+server:
+  port: 0

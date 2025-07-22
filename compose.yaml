@@ -83,3 +83,13 @@ services:
       - POSTGRES_DB=smart-home-order
       - POSTGRES_USER=sa
       - POSTGRES_PASSWORD=sa
+
+  db-delivery:
+    image: postgres:16.1
+    container_name: smart-home-delivery
+    ports:
+      - "12432:5432"
+    environment:
+      - POSTGRES_DB=smart-home-delivery
+      - POSTGRES_USER=sa
+      - POSTGRES_PASSWORD=sa

@@ -33,5 +33,12 @@ public class OrderExceptionHandler {
         return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "NoSpecifiedProductInWarehouseException");
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleNotEnoughInfoInOrderToCalculateException(NotEnoughInfoInOrderToCalculateException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NotEnoughInfoInOrderToCalculateException");
+    }
+
 
 }

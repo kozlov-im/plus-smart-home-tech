@@ -11,4 +11,6 @@ public interface ShoppingCartClient {
 
     @GetMapping("/username")
     String getUsernameByShoppingCartId(@RequestParam UUID shoppingCartId);
+
+
 }

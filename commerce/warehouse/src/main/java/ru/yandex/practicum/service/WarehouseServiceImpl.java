@@ -5,17 +5,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.dto.AddressDto;
 import ru.yandex.practicum.dto.BookedProductsDto;
+import ru.yandex.practicum.dto.OrderDto;
 import ru.yandex.practicum.dto.ShoppingCartDto;
 import ru.yandex.practicum.enums.QuantityState;
-import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
-import ru.yandex.practicum.exception.ProductNotFoundException;
-import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.yandex.practicum.exception.*;
+import ru.yandex.practicum.feignClient.OrderClient;
 import ru.yandex.practicum.feignClient.ShoppingStoreClient;
+import ru.yandex.practicum.mapper.BookingMapper;
 import ru.yandex.practicum.mapper.WarehouseProductMapper;
+import ru.yandex.practicum.model.Booking;
 import ru.yandex.practicum.model.WarehouseProduct;
+import ru.yandex.practicum.repository.BookingRepository;
 import ru.yandex.practicum.repository.WarehouseRepository;
 import ru.yandex.practicum.request.AddProductToWarehouseRequest;
+import ru.yandex.practicum.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.request.NewProductInWarehouseRequest;
+import ru.yandex.practicum.request.ShippedToDeliveryRequest;
 
 import java.security.SecureRandom;
 import java.util.*;
@@ -28,6 +33,9 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
     private final WarehouseProductMapper warehouseProductMapper;
     private final ShoppingStoreClient shoppingStoreClient;
+    private final BookingRepository bookingRepository;
+    private final OrderClient orderClient;
+    private final BookingMapper bookingMapper;
 
     private static final List<AddressDto> ADDRESSES;
     private static final Random RANDOM = new SecureRandom();
@@ -77,10 +85,13 @@ public class WarehouseServiceImpl implements WarehouseService {
                     () -> new NoSpecifiedProductInWarehouseException("specified productId " + productId + " was not found"));
 
             if (product.getQuantity() < quantity) {
+                if (type.equals("assemble_order")) {
+                    orderClient.setOrderAssembleFailed(shoppingCartDto.getShoppingCartId());
+                }
                 throw new NoSpecifiedProductInWarehouseException("amount of quantity for productId " + productId + " not enough");
             }
 
-            if (type.equals("order")) {
+            if (type.equals("assemble_order")) {
                 product.setQuantity(product.getQuantity() - quantity);
                 warehouseRepository.save(product);
                 updateQuantityInShoppingStore(product);
@@ -104,9 +115,42 @@ public class WarehouseServiceImpl implements WarehouseService {
         returnProductsList.forEach(this::addProductQuantity);
     }
 
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        Booking booking = bookingRepository.findByOrderId(request.getOrderId()).orElseThrow(
+                () -> new NotFoundException("Booking for order " + request.getOrderId() + " is not found")
+        );
+        booking.setDeliveryId(request.getDeliveryId());
+        bookingRepository.save(booking);
+
+    }
+
+    @Override
+    public BookedProductsDto assemblyProductsForOrder(AssemblyProductsForOrderRequest request) {
+
+        OrderDto orderForChecking = orderClient.getOrderById(request.getOrderId());
+        Map<UUID, Integer> productsForChecking = orderForChecking.getProducts();
+        Map<UUID, Integer> products = request.getProducts();
+
+        products.forEach((key, value) -> {
+            if (!productsForChecking.containsKey(key)) {
+                throw new ProductNotFoundException("product " + key + " is not found");
+            }
+            if (!productsForChecking.containsValue(value)) {
+                throw new NotFoundException("product " + key + " has incorrect quantity");
+            }
+        });
+        ShoppingCartDto productsForOrderAssembly = new ShoppingCartDto(request.getOrderId(), products);
+        BookedProductsDto bookedProductsDto = checkProductsForBooking(productsForOrderAssembly, "assemble_order");
+        Booking booking = bookingMapper.mapToBooking(bookedProductsDto, request);
+        System.out.println(booking);
+
+        return bookingMapper.mapToBookingDto(bookingRepository.save(booking));
+    }
+
     private void checkProductAlreadyInWarehouse(UUID productId) {
         warehouseRepository.findById(productId).ifPresent(warehouseProduct -> {
-            throw new SpecifiedProductAlreadyInWarehouseException("Product " + productId + "already present in the warehouse");
+            throw new SpecifiedProductAlreadyInWarehouseException("Product " + productId + " already present in the warehouse");
         });
     }
 
