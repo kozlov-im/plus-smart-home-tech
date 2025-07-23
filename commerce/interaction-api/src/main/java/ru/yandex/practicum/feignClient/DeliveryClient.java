@@ -1,5 +1,6 @@
 package ru.yandex.practicum.feignClient;
 
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.*;
@@ -11,7 +12,7 @@ import java.util.UUID;
 public interface DeliveryClient {
 
     @PutMapping
-    DeliveryDto createNewDelivery(@RequestBody DeliveryDto deliveryDto);
+    DeliveryDto createNewDelivery(@Valid @RequestBody DeliveryDto deliveryDto);
 
     @PostMapping("/successful")
     DeliveryDto setDeliverySuccessful(@RequestBody UUID deliveryId);
@@ -23,7 +24,7 @@ public interface DeliveryClient {
     DeliveryDto setDeliveryFailed(@RequestBody UUID deliveryId);
 
     @PostMapping("/cost")
-    BigDecimal calculateDeliveryCost(@RequestBody OrderDto orderDto);
+    BigDecimal calculateDeliveryCost(@Valid @RequestBody OrderDto orderDto);
 
     @PostMapping("/cancelled")
     DeliveryDto setDeliveryCancel(@RequestBody UUID deliveryId);

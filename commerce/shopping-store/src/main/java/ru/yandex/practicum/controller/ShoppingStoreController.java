@@ -9,7 +9,7 @@ import ru.yandex.practicum.dto.Pageable;
 import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.enums.QuantityState;
-import ru.yandex.practicum.repository.ShoppingStoreRepository;
+import ru.yandex.practicum.feignClient.ShoppingStoreClient;
 import ru.yandex.practicum.service.ShoppingStoreService;
 
 import java.util.UUID;
@@ -18,35 +18,34 @@ import java.util.UUID;
 @AllArgsConstructor
 @RequestMapping("/api/v1/shopping-store")
 @Slf4j
-public class ShoppingStoreController {
+public class ShoppingStoreController implements ShoppingStoreClient {
     private ShoppingStoreService shoppingStoreService;
-    private ShoppingStoreRepository shoppingStoreRepository;
 
-    @GetMapping
+    @Override
     public Page<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, Pageable pageable) {
         log.info("getProductsByCategory request category {}, pageable {}", category, pageable);
         return shoppingStoreService.getProductsByCategory(category, pageable);
     }
 
-    @PutMapping
+    @Override
     public ProductDto addProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("addProduct request {}", productDto);
         return shoppingStoreService.addProduct(productDto);
     }
 
-    @PostMapping
+    @Override
     public ProductDto updateProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("updateProduct request {}", productDto);
         return shoppingStoreService.updateProduct(productDto);
     }
 
-    @PostMapping("/removeProductFromStore")
+    @Override
     public void removeProductFromStore(@RequestBody UUID productId) {
         log.info("removeProductFromStore request {}", productId);
         shoppingStoreService.removeProductFromStore(productId);
     }
 
-    @PostMapping("/quantityState")
+    @Override
     public ProductDto setProductQuantityState(@RequestParam UUID productId,
                                               @RequestParam QuantityState quantityState) {
         log.info("quantityState request: productId {}, quantityState {}", productId, quantityState);
@@ -54,7 +53,7 @@ public class ShoppingStoreController {
 
     }
 
-    @GetMapping("/{productId}")
+    @Override
     public ProductDto getProductById(@PathVariable UUID productId) {
         log.info("getProductById request {}", productId);
         return shoppingStoreService.getProductById(productId);

@@ -1,8 +1,7 @@
 package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.UuidGenerator;
 import ru.yandex.practicum.enums.OrderState;
@@ -12,8 +11,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Data
 @Table(name = "orders")
+@Getter
+@Setter
+@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Order {
 

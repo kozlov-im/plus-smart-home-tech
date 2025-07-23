@@ -20,7 +20,7 @@ public interface OrderClient {
     OrderDto createNewOrder(@Valid @RequestBody CreateNewOrderRequest request);
 
     @PostMapping("/return")
-    OrderDto returnOrder(@RequestBody ProductReturnRequest request);
+    OrderDto returnOrder(@Valid @RequestBody ProductReturnRequest request);
 
     @PostMapping("/payment")
     OrderDto createOrderPayment(@RequestBody UUID orderId);

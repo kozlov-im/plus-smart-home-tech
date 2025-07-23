@@ -1,9 +1,7 @@
 package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import ru.yandex.practicum.enums.ShoppingCartState;
 
@@ -12,9 +10,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "carts")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class ShoppingCart {
 
     @Id

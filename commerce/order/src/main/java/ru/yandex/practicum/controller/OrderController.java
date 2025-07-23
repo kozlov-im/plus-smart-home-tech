@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.OrderDto;
+import ru.yandex.practicum.feignClient.OrderClient;
 import ru.yandex.practicum.request.CreateNewOrderRequest;
 import ru.yandex.practicum.request.ProductReturnRequest;
 import ru.yandex.practicum.service.OrderService;
@@ -16,107 +17,105 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/order")
 @RequiredArgsConstructor
-public class OrderController {
+public class OrderController implements OrderClient {
 
     private final OrderService orderService;
 
-    @GetMapping
+    @Override
     public Collection<OrderDto> getUserOrders(String username) {
         log.info("getUserOrders {}", username);
         return orderService.getUserOrders(username);
     }
 
 
-    @PutMapping
+    @Override
     public OrderDto createNewOrder(@Valid @RequestBody CreateNewOrderRequest request) {
         log.info("createNewOrder request {}", request);
         return orderService.createNewOrder(request);
     }
 
-    @PostMapping("/return")
+    @Override
     public OrderDto returnOrder(@Valid @RequestBody ProductReturnRequest request) {
         log.info("returnOrder request {}", request);
         return orderService.returnOrder(request);
     }
 
-    @PostMapping("/payment")
+    @Override
     public OrderDto createOrderPayment(@RequestBody UUID orderId) {
         log.info("createOrderPayment request for order{}", orderId);
         return orderService.createOrderPayment(orderId);
     }
 
-    @PostMapping("/payment/failed")
+    @Override
     public OrderDto setOrderPaymentFailed(@RequestBody UUID orderId) {
         log.info("setOrderPaymentFailed request for order{}", orderId);
         return orderService.setOrderPaymentFailed(orderId);
     }
 
-    @PostMapping("/delivery")
+    @Override
     public OrderDto setOrderDeliveryDelivered(@RequestBody UUID orderId) {
         log.info("setOrderDeliveryDelivered request for order{}", orderId);
         return orderService.setOrderDeliveryDelivered(orderId);
     }
 
-    @PostMapping("/delivery/failed")
+    @Override
     public OrderDto setOrderDeliveryFailed(@RequestBody UUID orderId) {
         log.info("setOrderDeliveryFailed request for order{}", orderId);
         return orderService.setOrderDeliveryFailed(orderId);
     }
 
-    @PostMapping("/completed")
+    @Override
     public OrderDto setOrderCompleted(@RequestBody UUID orderId) {
         log.info("setOrderCompleted request for order{}", orderId);
         return orderService.setOrderCompleted(orderId);
     }
 
-    @PostMapping("/calculate/total")
+    @Override
     public OrderDto calculateOrderTotalPrice(@RequestBody UUID orderId) {
         log.info("calculateOrderTotalPrice request for order{}", orderId);
         return orderService.calculateOrderTotalPrice(orderId);
     }
 
-    @PostMapping("/calculate/delivery")
+    @Override
     public OrderDto calculateOrderDelivery(@RequestBody UUID orderId) {
         log.info("calculateOrderDelivery request for order{}", orderId);
         return orderService.calculateOrderDelivery(orderId);
     }
 
-    @PostMapping("/assembly")
+    @Override
     public OrderDto assembleOrder(@RequestBody UUID orderId) {
         log.info("assembleOrder request for order{}", orderId);
         return orderService.assembleOrder(orderId);
     }
 
-    @PostMapping("/assembly/failed")
+    @Override
     public OrderDto setOrderAssembleFailed(@RequestBody UUID orderId) {
         log.info("setOrderAssembleFailed request for order{}", orderId);
         return orderService.setOrderAssembleFailed(orderId);
     }
 
-    @PostMapping("/payment/success")
+    @Override
     public OrderDto setOrderPaymentSuccess(@RequestBody UUID orderId) {
         log.info("setOrderPaymentSuccess request for order{}", orderId);
         return orderService.setOrderPaymentSuccess(orderId);
     }
 
-    @GetMapping("/id")
+    @Override
     public OrderDto getOrderById(@RequestParam UUID orderId) {
         log.info("getOrderById {}", orderId);
         return orderService.getOrderById(orderId);
     }
 
-    @PostMapping("/delivery/success")
+    @Override
     public OrderDto setOrderDeliverySuccess(@RequestBody UUID orderId) {
         log.info("setOrderDeliverySuccess request for order{}", orderId);
         return orderService.setOrderDeliverySuccess(orderId);
     }
 
 
-
     @GetMapping("/test")
     public String test() {
         return "Order is running";
     }
-
 
 }

@@ -166,7 +166,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 : (quantity <= 100) ? QuantityState.ENOUGH
                 : QuantityState.MANY;
         try {
-            shoppingStoreClient.updateProductQuantity(product.getProductId(), quantityState);
+            shoppingStoreClient.setProductQuantityState(product.getProductId(), quantityState);
         } catch (ProductNotFoundException e) {
             log.error("Feign client error: Product with UUID={} is not found in shopping store. Quantity in the shopping store was not updated!",
                     product.getProductId());

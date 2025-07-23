@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.OrderDto;
 import ru.yandex.practicum.dto.PaymentDto;
+import ru.yandex.practicum.feignClient.PaymentClient;
 import ru.yandex.practicum.service.PaymentService;
 
 import java.math.BigDecimal;
@@ -15,35 +16,35 @@ import java.util.UUID;
 @RequestMapping("api/v1/payment")
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentController {
+public class PaymentController implements PaymentClient {
 
     private final PaymentService paymentService;
 
-    @PostMapping
+    @Override
     public PaymentDto createPayment(@Valid @RequestBody OrderDto orderDto) {
         log.info("createPayment request for order {}", orderDto.getOrderId());
         return paymentService.createPayment(orderDto);
     }
 
-    @PostMapping("/totalCost")
+    @Override
     public BigDecimal calculatePaymentTotalCost(@Valid @RequestBody OrderDto orderDto) {
         log.info("calculatePaymentTotalCost request for order {}", orderDto.getOrderId());
         return paymentService.calculatePaymentTotalCost(orderDto);
     }
 
-    @PostMapping("/refund")
+    @Override
     public void setPaymentSuccess(@RequestBody UUID paymentId) {
         log.info("setPaymentSuccess request for payment {}", paymentId);
         paymentService.setPaymentSuccess(paymentId);
     }
 
-    @PostMapping("/productCost")
+    @Override
     public BigDecimal calculatePaymentProductCost(@Valid @RequestBody OrderDto orderDto) {
         log.info("calculatePaymentProductCost request for order {}", orderDto.getOrderId());
         return paymentService.calculatePaymentProductCost(orderDto);
     }
 
-    @PostMapping("/failed")
+    @Override
     public void setPaymentFailed(@RequestBody UUID paymentId) {
         log.info("setPaymentFailed request for payment {}", paymentId);
         paymentService.setPaymentFailed(paymentId);

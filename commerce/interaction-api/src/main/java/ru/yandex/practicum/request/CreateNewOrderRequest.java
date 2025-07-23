@@ -20,8 +20,4 @@ public class CreateNewOrderRequest {
 
     @NotNull
     AddressDto address;
-
-    //@NotNull
-    //String username;
-
 }

@@ -1,8 +1,7 @@
 package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.UuidGenerator;
 import ru.yandex.practicum.enums.DeliveryState;
@@ -11,7 +10,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "delivery")
-@Data
+@Getter
+@Setter
+@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Delivery {
 

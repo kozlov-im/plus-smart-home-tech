@@ -75,7 +75,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         String username = shoppingCartRepository.findNameByShoppingCartId(shoppingCartId).orElseThrow(
                 () -> new NotFoundException("Cart is not found")
         );
-        return username; //shoppingCartRepository.findNameByShoppingCartId(shoppingCartId);
+        return username;
     }
 
 
