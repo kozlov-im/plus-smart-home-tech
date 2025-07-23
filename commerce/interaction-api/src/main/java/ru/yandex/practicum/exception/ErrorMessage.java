@@ -24,4 +24,6 @@ public class ErrorMessage {
         this.suppressed = exception.getSuppressed();
         this.localizedMessage = exception.getLocalizedMessage();
     }
+
+    public ErrorMessage() {}
 }

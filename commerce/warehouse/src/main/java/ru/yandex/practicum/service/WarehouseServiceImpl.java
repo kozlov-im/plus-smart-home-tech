@@ -1,26 +1,30 @@
 package ru.yandex.practicum.service;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.dto.AddressDto;
 import ru.yandex.practicum.dto.BookedProductsDto;
+import ru.yandex.practicum.dto.OrderDto;
 import ru.yandex.practicum.dto.ShoppingCartDto;
 import ru.yandex.practicum.enums.QuantityState;
-import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
-import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.yandex.practicum.exception.*;
+import ru.yandex.practicum.feignClient.OrderClient;
 import ru.yandex.practicum.feignClient.ShoppingStoreClient;
+import ru.yandex.practicum.mapper.BookingMapper;
 import ru.yandex.practicum.mapper.WarehouseProductMapper;
+import ru.yandex.practicum.model.Booking;
 import ru.yandex.practicum.model.WarehouseProduct;
+import ru.yandex.practicum.repository.BookingRepository;
 import ru.yandex.practicum.repository.WarehouseRepository;
 import ru.yandex.practicum.request.AddProductToWarehouseRequest;
+import ru.yandex.practicum.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.request.NewProductInWarehouseRequest;
+import ru.yandex.practicum.request.ShippedToDeliveryRequest;
 
 import java.security.SecureRandom;
 import java.util.*;
 
-@SuppressWarnings("checkstyle:Regexp")
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -29,6 +33,9 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
     private final WarehouseProductMapper warehouseProductMapper;
     private final ShoppingStoreClient shoppingStoreClient;
+    private final BookingRepository bookingRepository;
+    private final OrderClient orderClient;
+    private final BookingMapper bookingMapper;
 
     private static final List<AddressDto> ADDRESSES;
     private static final Random RANDOM = new SecureRandom();
@@ -64,7 +71,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public BookedProductsDto checkProductsForBooking(ShoppingCartDto shoppingCartDto) {
+    public BookedProductsDto checkProductsForBooking(ShoppingCartDto shoppingCartDto, String type) {
 
         double totalWeight = 0;
         double totalVolume = 0;
@@ -78,7 +85,16 @@ public class WarehouseServiceImpl implements WarehouseService {
                     () -> new NoSpecifiedProductInWarehouseException("specified productId " + productId + " was not found"));
 
             if (product.getQuantity() < quantity) {
+                if (type.equals("assemble_order")) {
+                    orderClient.setOrderAssembleFailed(shoppingCartDto.getShoppingCartId());
+                }
                 throw new NoSpecifiedProductInWarehouseException("amount of quantity for productId " + productId + " not enough");
+            }
+
+            if (type.equals("assemble_order")) {
+                product.setQuantity(product.getQuantity() - quantity);
+                warehouseRepository.save(product);
+                updateQuantityInShoppingStore(product);
             }
 
             totalWeight += product.getWeight() * quantity;
@@ -86,20 +102,61 @@ public class WarehouseServiceImpl implements WarehouseService {
             fragile |= product.isFragile();
         }
         return BookedProductsDto.builder()
-                .deliveryWeight(totalWeight)
-                .deliveryVolume(totalVolume)
+                .deliveryWeight(Math.round(totalWeight * 100.0) / 100.0)
+                .deliveryVolume(Math.round(totalVolume * 100.0) / 100.0)
                 .fragile(fragile)
                 .build();
     }
 
+    @Override
+    public void returnProduct(Map<UUID, Integer> products) {
+        Collection<AddProductToWarehouseRequest> returnProductsList = products.entrySet().stream()
+                .map(entry -> new AddProductToWarehouseRequest(entry.getKey(), entry.getValue())).toList();
+        returnProductsList.forEach(this::addProductQuantity);
+    }
+
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        Booking booking = bookingRepository.findByOrderId(request.getOrderId()).orElseThrow(
+                () -> new NotFoundException("Booking for order " + request.getOrderId() + " is not found")
+        );
+        booking.setDeliveryId(request.getDeliveryId());
+        bookingRepository.save(booking);
+
+    }
+
+    @Override
+    public BookedProductsDto assemblyProductsForOrder(AssemblyProductsForOrderRequest request) {
+
+        OrderDto orderForChecking = orderClient.getOrderById(request.getOrderId());
+        Map<UUID, Integer> productsForChecking = orderForChecking.getProducts();
+        Map<UUID, Integer> products = request.getProducts();
+
+        products.forEach((key, value) -> {
+            if (!productsForChecking.containsKey(key)) {
+                throw new ProductNotFoundException("product " + key + " is not found");
+            }
+            if (!productsForChecking.containsValue(value)) {
+                throw new NotFoundException("product " + key + " has incorrect quantity");
+            }
+        });
+        ShoppingCartDto productsForOrderAssembly = new ShoppingCartDto(request.getOrderId(), products);
+        BookedProductsDto bookedProductsDto = checkProductsForBooking(productsForOrderAssembly, "assemble_order");
+        Booking booking = bookingMapper.mapToBooking(bookedProductsDto, request);
+        System.out.println(booking);
+
+        return bookingMapper.mapToBookingDto(bookingRepository.save(booking));
+    }
+
     private void checkProductAlreadyInWarehouse(UUID productId) {
         warehouseRepository.findById(productId).ifPresent(warehouseProduct -> {
-            throw new SpecifiedProductAlreadyInWarehouseException("Product already present in the warehouse"); });
+            throw new SpecifiedProductAlreadyInWarehouseException("Product " + productId + " already present in the warehouse");
+        });
     }
 
     private WarehouseProduct getWarehouseProduct(UUID productId) {
-       return warehouseRepository.findById(productId).orElseThrow(
-                () -> new NoSpecifiedProductInWarehouseException("Product is not found"));
+        return warehouseRepository.findById(productId).orElseThrow(
+                () -> new NoSpecifiedProductInWarehouseException("Product " + productId + " is not found"));
     }
 
     private void updateQuantityInShoppingStore(WarehouseProduct product) {
@@ -109,9 +166,10 @@ public class WarehouseServiceImpl implements WarehouseService {
                 : (quantity <= 100) ? QuantityState.ENOUGH
                 : QuantityState.MANY;
         try {
-            shoppingStoreClient.updateProductQuantity(product.getProductId(), quantityState);
-        } catch (FeignException e) {
-            log.error("Feign client error");
+            shoppingStoreClient.setProductQuantityState(product.getProductId(), quantityState);
+        } catch (ProductNotFoundException e) {
+            log.error("Feign client error: Product with UUID={} is not found in shopping store. Quantity in the shopping store was not updated!",
+                    product.getProductId());
         }
     }
 }

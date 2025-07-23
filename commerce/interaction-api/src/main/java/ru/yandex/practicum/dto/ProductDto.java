@@ -21,13 +21,11 @@ public class ProductDto {
 
     @NotBlank
     private String productName;
+
     private String description;
     private String imageSrc;
-
     private QuantityState quantityState;
-
     private ProductState productState;
-
     private ProductCategory productCategory;
 
     @NotNull

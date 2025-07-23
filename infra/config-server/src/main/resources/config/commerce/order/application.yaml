@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:10432/smart-home-order
+    driverClassName: org.postgresql.Driver
+    username: sa
+    password: sa
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update #none
+    properties:
+      hibernate:
+        format_sql: true
+  application:
+    name: order
+
+server:
+  port: 0

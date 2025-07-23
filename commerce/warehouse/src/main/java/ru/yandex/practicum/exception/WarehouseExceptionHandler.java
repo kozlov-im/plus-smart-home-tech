@@ -16,13 +16,41 @@ public class WarehouseExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorMessage handleSpecifiedProductAlreadyInWarehouseException(SpecifiedProductAlreadyInWarehouseException exception) {
         log.error(Arrays.toString(exception.getStackTrace()));
-        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "Chosen product already in warehouse");
+        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "SpecifiedProductAlreadyInWarehouseException");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorMessage handleNoSpecifiedProductInWarehouseException(NoSpecifiedProductInWarehouseException exception) {
         log.error(Arrays.toString(exception.getStackTrace()));
-        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "Chosen product is absent in warehouse");
+        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "NoSpecifiedProductInWarehouseException");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleProductNotFoundException(ProductNotFoundException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "ProductNotFoundException");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleProductInShoppingCartLowQuantityInWarehouse(ProductInShoppingCartLowQuantityInWarehouse exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "ProductInShoppingCartLowQuantityInWarehouse");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleNoOrderFoundException(NoOrderFoundException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NoOrderFoundException");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleNotFoundException(NotFoundException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NotFoundException");
     }
 }

@@ -16,6 +16,21 @@ public class ShoppingCartExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorMessage handleNotAuthorizedUserException(NotAuthorizedUserException exception) {
         log.error(Arrays.toString(exception.getStackTrace()));
-        return new ErrorMessage(exception, HttpStatus.UNAUTHORIZED, "User is not authorized");
+        return new ErrorMessage(exception, HttpStatus.UNAUTHORIZED, "NotAuthorizedUserException");
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleNotFoundException(NotFoundException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.NOT_FOUND, "NotFoundException");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ErrorMessage handleNoSpecifiedProductInWarehouseException(NoSpecifiedProductInWarehouseException exception) {
+        log.error(Arrays.toString(exception.getStackTrace()));
+        return new ErrorMessage(exception, HttpStatus.BAD_REQUEST, "NoSpecifiedProductInWarehouseException");
+    }
+
 }
